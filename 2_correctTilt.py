@@ -66,8 +66,8 @@ def show_result(image_path,i,files_length,folder_path):
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
-        # cv2.imwrite(folder_path+'Dot/O'+str(i)+'.jpg',orig)
-        cv2.imwrite(folder_path+'Dot/TC_'+str(i)+'.jpg',warped)
+        cv2.imwrite(folder_path+'NP'+str(i)+'.jpg',orig)
+        cv2.imwrite('../Our Dataset/Working Dataset/Corrected Tilt/TC_'+str(i)+'.jpg',warped)
     except:
         pass
         # cv2.imwrite(folder_path+'Dot/O'+str(i)+'.jpg',orig)
@@ -88,7 +88,7 @@ def show_result(image_path,i,files_length,folder_path):
 
 
 
-folder_path = '../../Our Dataset/LP Only/train/'
+folder_path = '../Our Dataset/Working Dataset/Num Plate/'
 os.makedirs(folder_path, exist_ok=True)
 all_files = os.listdir(folder_path)
 jpg_files = [file for file in all_files if file.lower().endswith('.jpg')]
