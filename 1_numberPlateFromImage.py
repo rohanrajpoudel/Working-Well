@@ -53,7 +53,8 @@ def main():
     # Define the class names
     classes = ["RedLP", "RedLP"]  # Adjust the class names based on your dataset
     i=1
-    dataset_path="C:/Users/rohan/Desktop/Now/MP model/Our Dataset/Good Data/"
+    # dataset_path="C:/Users/rohan/Desktop/Now/MP model/Our Dataset/Good Data/"
+    dataset_path="C:/Users/rohan/Desktop/Now/MP model/Our Dataset/Working Dataset/Still Vehicle/"
     os.makedirs(dataset_path, exist_ok=True)
     all_files = os.listdir(dataset_path)
     jpg_files = [file for file in all_files if file.lower().endswith('.jpg')]

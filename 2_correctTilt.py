@@ -66,11 +66,11 @@ def show_result(image_path,i,files_length,folder_path):
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()
 
-        cv2.imwrite(folder_path+'Dot/O'+str(i)+'.jpg',orig)
-        cv2.imwrite(folder_path+'Dot/W'+str(i)+'.jpg',warped)
+        # cv2.imwrite(folder_path+'Dot/O'+str(i)+'.jpg',orig)
+        cv2.imwrite(folder_path+'Dot/TC_'+str(i)+'.jpg',warped)
     except:
-
-        cv2.imwrite(folder_path+'Dot/O'+str(i)+'.jpg',orig)
+        pass
+        # cv2.imwrite(folder_path+'Dot/O'+str(i)+'.jpg',orig)
         # cv2.imshow("No counter found",imutils.resize(orig, height = 201))
         # if cv2.waitKey(33) == 27:
         #     sys.exit()
