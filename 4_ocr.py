@@ -10,8 +10,13 @@ def perform_ocr(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     # Resize the image to match the input size of the trained model
     image = cv2.resize(image, (32, 32))
-    # Normalize pixel values
-    image = image / 255.0
+    # Bilateral filtering
+    image = cv2.bilateralFilter(image,5,30,45)
+    # Otsu's thresholding
+    _,image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # thinning the image
+    image = cv2.ximgproc.thinning(image)
+
     # Reshape the image to match the input shape expected by the model
     image = image.reshape(1, 32, 32, 1)
 

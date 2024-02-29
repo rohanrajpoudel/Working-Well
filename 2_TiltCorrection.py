@@ -21,8 +21,36 @@ def show_result(image_path,i,files_length,folder_path):
     gradient_x = cv2.filter2D(image, -1, sobel_kernel)
     # Binarize the horizontal gradient using Otsu's method
     _, binary_vertical_map = cv2.threshold(np.abs(gradient_x).astype(np.uint8), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    # Display the result using cv2.imshow
-    cv2.imshow("Filtered Image", binary_vertical_map)
+    
+    projection = np.sum(binary_vertical_map, axis=1)
+    
+    # Calculate the mean value of the histogram
+    threshold = np.mean(projection)
+    
+    # Determine upper and lower bounds based on the threshold
+    upper_bound = 0
+    lower_bound = len(projection) - 1
+    
+    for i, value in enumerate(projection):
+        if value > threshold:
+            upper_bound = i
+            break
+    
+    for i in range(len(projection) - 1, -1, -1):
+        if projection[i] > threshold:
+            lower_bound = i
+            break
+    
+    # Adjust bounds
+    upper_bound -= 2
+    lower_bound += 2
+
+    # Draw bounding box on the license plate image
+    bounding_box_image = cv2.rectangle(image.copy(), (0, upper_bound), (image.shape[1], lower_bound), (0, 255, 0), 2)
+
+    # Display the results
+    cv2.imshow('License Plate Boundary', bounding_box_image)
+
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     i+=1
