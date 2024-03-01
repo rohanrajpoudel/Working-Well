@@ -1,3 +1,4 @@
 numberPlate-FasterRCNN.pth
 characterSegment-FasterRCNN.pth
 ocrModel.h5
+__pycache__
