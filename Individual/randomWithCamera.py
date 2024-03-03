@@ -4,8 +4,23 @@ import os
 import random
 from tensorflow.keras.models import load_model
 
+# Define the path to Faster RCNN Number Plate Detection Model
+numPlateModelPath = './Bulk/numberPlate-FasterRCNN.pth'
+charSegModelPath = './Bulk/characterSegment-FasterRCNN.pth'
+ocrModelPath = './Bulk/ocrModel.h5'
+# Load the model
+numPlateModel = torch.load(numPlateModelPath, map_location=torch.device('cpu'))
+charSegModel = torch.load(charSegModelPath, map_location=torch.device('cpu'))
+ocrModel = load_model(ocrModelPath)
+# Set the model to evaluation mode
+numPlateModel.eval()  
+charSegModel.eval()  
+# Define the class names
+numPlateClasses = ["RedLP", "RedLP"]
+charSegClasses = ["Char", "Char"]
+
 # Function to perform OCR on an image using the trained model
-def perform_ocr(image, ocrModel):
+def perform_ocr(image):
     try:
         image = cv2.resize(image, (32, 32))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -40,14 +55,14 @@ def perform_ocr(image, ocrModel):
     except:
         pass
 
-def charSegShow(image, model, classes, ocrModel):
+def charSegShow(image):
     image = cv2.resize(image,(400,200))
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     image_tensor = torch.tensor(image_rgb / 255.0, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0)
 
     # Perform inference
     with torch.no_grad():
-        predictions = model(image_tensor)
+        predictions = charSegModel(image_tensor)
 
     # Extract relevant information from predictions
     boxes = predictions[0]['boxes']
@@ -58,13 +73,13 @@ def charSegShow(image, model, classes, ocrModel):
     j = 0
     for box, score, label in zip(boxes, scores, labels):
         j += 1
-        if classes[label] == "Char" and score > 0.8:  # Adjust the confidence threshold as needed
+        if charSegClasses[label] == "Char" and score > 0.8:  # Adjust the confidence threshold as needed
             box = [int(coord) for coord in box.tolist()]
             # image = cv2.rectangle(image, (box[0], box[1]), (box[2], box[3]), (0, 255, 0), 2)
             #to save the cropped image
             # print(box)
             cropped_image = image[(box[1]-4):(box[3]+4), (box[0]-2):(box[2]+2)]
-            character = perform_ocr(cropped_image, ocrModel)
+            character = perform_ocr(cropped_image)
             # cv2.imwrite(f"./RedLP_{i}.jpg", cropped_image) 
             # image = cv2.putText(image, f"{score:.2f}", (box[0], box[1]),
             image = cv2.rectangle(image, (box[0], box[1]-4), (box[2], box[3]+4), (0, 255, 0), 2)
@@ -72,7 +87,7 @@ def charSegShow(image, model, classes, ocrModel):
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
     return image
 
-def numPlateShow(image, model, classes):
+def numPlateShow(image):
     # image = cv2.imread(image_path)
     h,w,_=image.shape
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -80,7 +95,7 @@ def numPlateShow(image, model, classes):
 
     # Perform inference
     with torch.no_grad():
-        predictions = model(image_tensor)
+        predictions = numPlateModel(image_tensor)
 
     # Extract relevant information from predictions
     boxes = predictions[0]['boxes']
@@ -89,7 +104,7 @@ def numPlateShow(image, model, classes):
 
     # Draw bounding boxes for "Red LP" class
     for box, score, label in zip(boxes, scores, labels):
-        if classes[label] == "RedLP" and score > 0.8:  # Adjust the confidence threshold as needed
+        if numPlateClasses[label] == "RedLP" and score > 0.8:  # Adjust the confidence threshold as needed
             box = [int(coord) for coord in box.tolist()]
             # Corp the number plate
             cropped_image = image[(box[1]):(box[3]), (box[0]):(box[2])]
@@ -105,30 +120,7 @@ def numPlateShow(image, model, classes):
         return image
 
 def main():
-    # Define the path to Faster RCNN Number Plate Detection Model
-    numPlateModelPath = './Bulk/numberPlate-FasterRCNN.pth'
-    charSegModelPath = './Bulk/characterSegment-FasterRCNN.pth'
-    ocrModelPath = './Bulk/ocrModel.h5'
-    # Load the model
-    numPlateModel = torch.load(numPlateModelPath, map_location=torch.device('cpu'))
-    charSegModel = torch.load(charSegModelPath, map_location=torch.device('cpu'))
-    ocrModel = load_model(ocrModelPath)
-    # Set the model to evaluation mode
-    numPlateModel.eval()  
-    charSegModel.eval()  
-    # Define the class names
-    numPlateClasses = ["RedLP", "RedLP"]
-    charSegClasses = ["Char", "Char"]
-    dataset_path="C:/Users/rohan/Desktop/Now/MP model/Our Dataset/Working Dataset/Still Vehicle/"
-    os.makedirs(dataset_path, exist_ok=True)
-    all_files = os.listdir(dataset_path)
-    jpg_files = [file for file in all_files if file.lower().endswith('.jpg')]
-    files_length=len(jpg_files)-1
-    jpg_file = jpg_files[random.randint(0, files_length)]
-    originalImage = capture_image()
-    numPlateImage = numPlateShow(originalImage, numPlateModel, numPlateClasses)
-    finalResultImage = charSegShow(numPlateImage, charSegModel, charSegClasses, ocrModel)
-
+    originalImage, finalResultImage = capture_image()
     cv2.imshow("Original Image", originalImage)
     cv2.imshow("Final Result", finalResultImage)
     cv2.waitKey(0)
@@ -137,21 +129,20 @@ def main():
 def capture_image():
     # Open a connection to the webcam (0 indicates the default camera)
     cap = cv2.VideoCapture(0)
-
     if not cap.isOpened():
         print("Error: Could not open webcam.")
         return
-
     # Capture a single frame
     ret, frame = cap.read()
-
     # Release the webcam
     cap.release()
-
     if ret:
-        return frame
-    else:
-        print("Error: Could not capture an image.")
+        try:
+            numPlateImage = numPlateShow(frame)
+            finalResultImage = charSegShow(numPlateImage)
+            return frame, finalResultImage
+        except:
+            pass
 
-main()
+# main()
 
