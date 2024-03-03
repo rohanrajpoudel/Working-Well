@@ -3,6 +3,8 @@ import torch
 import os
 import random
 from tensorflow.keras.models import load_model
+from picamera.array import PiRGBArray
+from picamera import PiCamera
 
 # Define the path to Faster RCNN Number Plate Detection Model
 numPlateModelPath = './Bulk/numberPlate-FasterRCNN.pth'
@@ -18,6 +20,8 @@ charSegModel.eval()
 # Define the class names
 numPlateClasses = ["RedLP", "RedLP"]
 charSegClasses = ["Char", "Char"]
+camera = PiCamera()
+rawCapture = PiRGBArray(camera)
 
 # Function to perform OCR on an image using the trained model
 def perform_ocr(image):
@@ -127,22 +131,17 @@ def main():
     cv2.destroyAllWindows()
 
 def capture_image():
-    # Open a connection to the webcam (0 indicates the default camera)
-    cap = cv2.VideoCapture(0)
+    camera.capture(rawCapture, format="bgr")
+    cap = rawCapture.array
     if not cap.isOpened():
         print("Error: Could not open webcam.")
         return
-    # Capture a single frame
-    ret, frame = cap.read()
-    # Release the webcam
-    cap.release()
-    if ret:
-        try:
-            numPlateImage = numPlateShow(frame)
-            finalResultImage = charSegShow(numPlateImage)
-            return frame, finalResultImage
-        except:
-            pass
+    try:
+        numPlateImage = numPlateShow(cap)
+        finalResultImage = charSegShow(numPlateImage)
+        return cap, finalResultImage
+    except:
+        pass
 
 # main()
 
