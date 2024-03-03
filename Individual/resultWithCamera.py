@@ -7,9 +7,9 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 
 # Define the path to Faster RCNN Number Plate Detection Model
-numPlateModelPath = './Bulk/numberPlate-FasterRCNN.pth'
-charSegModelPath = './Bulk/characterSegment-FasterRCNN.pth'
-ocrModelPath = './Bulk/ocrModel.h5'
+numPlateModelPath = '../Bulk/numberPlate-FasterRCNN.pth'
+charSegModelPath = '../Bulk/characterSegment-FasterRCNN.pth'
+ocrModelPath = '../Bulk/ocrModel.h5'
 # Load the model
 numPlateModel = torch.load(numPlateModelPath, map_location=torch.device('cpu'))
 charSegModel = torch.load(charSegModelPath, map_location=torch.device('cpu'))
