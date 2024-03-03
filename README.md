@@ -40,9 +40,10 @@ This project contains code files and a custom trained OCR model for performing v
 - Description: This code performs character recognition using OCR techniques.
 - Usage: Run the code to recognize characters from an image.
 
-## SavedItem Folder
-#### Contains 10 sample images, and a space to store result
 ### oceModel.h5
 
 - Description: This file contains our custom trained OCR model.
 - Usage: Load the model for character recognition tasks.
+
+## SavedItem Folder
+#### Contains 10 sample images, and a space to store result
